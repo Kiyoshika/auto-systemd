@@ -13,14 +13,14 @@ Most people are probably not comfortable with `asyd` using `sudo`, so instead I'
 
 After creating a new user, it's recommended to use `sudo loginctl enable-linger [new-username]` on your new user to allow the service to automatically start at boot. Although, technically this is optional.
 
+## WARNING
+This is probably obvious, but be mindful about architectural differences if you are building code on, say, a Mac and using `asyd` to deploy the project on a linux server - that executable is NOT going to run properly unless you cross compile.
+
 ## Installation
-Build 
+TODO:
 
 ## Usage
 Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh -i yourkey.pem you@yourserver`
-
-## WARNING
-This is probably obvious, but be mindful about architectural differences if you are building code on, say, a Mac and using `asyd` to deploy the project on a linux server - that executable is NOT going to run properly unless you cross compile.
 
 ### General
 * List all your current projects and whether or not they're currently running: `asyd ls`
