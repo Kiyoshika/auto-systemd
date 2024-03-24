@@ -32,6 +32,8 @@ public:
         this->key_action["schedule"] = &Config::set_schedule;
     }
 
+    ConfigType get_type() const;
+
     // Reads config settings from file.
     // Returns true on success, false otherwise.
     bool from_file(const std::string& filepath);

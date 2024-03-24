@@ -10,3 +10,4 @@ asyd
 
 # mac
 .DS_Store/
+*.dSYM/
