@@ -2,6 +2,11 @@
 
 using namespace asyd;
 
+ConfigType Config::get_type() const
+{
+    return this->config_type;
+}
+
 bool Config::from_file(const std::string& filepath)
 {
     std::ifstream config(filepath);

@@ -17,7 +17,9 @@ After creating a new user, it's recommended to use `sudo loginctl enable-linger 
 This is probably obvious, but be mindful about architectural differences if you are building code on, say, a Mac and using `asyd` to deploy the project on a linux server - that executable is NOT going to run properly unless you cross compile.
 
 ## Installation
-TODO:
+1. `git clone --recursive git@github.com:Kiyoshika/auto-systemd.git`
+2. `make` to build the `asyd` executable into the `./out` directory
+3. Add the `./out` directory to your path to use `asyd` anywhere
 
 ## Usage
 Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh -i yourkey.pem you@yourserver`
