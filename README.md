@@ -4,14 +4,12 @@ This project is to simplify the process of "deploying" code to a **linux** serve
 Typically systemd services/timers are used to either run servers or schedule jobs, but setting them up and deploying changes can be a bit tedious. That's where this tool comes to bridge the gap.
 
 ## How it works
-`asyd` works by building a project-specific config file which attaches key things such as the hostname, local public key destination (used to ssh), the path to the executable, etc. to build a systemd service file(s) which are then copied to the remote server along with the executable and any specified directories.
+`asyd` works by building a project-specific config file which attaches key things such as the hostname, the path to the executable script, etc. to build a systemd service file(s) which are then copied to the remote server along with the executable and any specified directories.
 
 When making "deployments", the new file(s) are copied to the remote server and the service is restarted.
 
 ## Server Setup (Prerequisites)
-Most people are probably not comfortable with `asyd` using `sudo`, so instead I'd heavily recommend creating a new user on your server that `asyd` can use for user-level services instead of system-level (which would require `sudo`.)
-
-After creating a new user, it's recommended to use `sudo loginctl enable-linger [new-username]` on your new user to allow the service to automatically start at boot. Although, technically this is optional.
+Most people are probably not comfortable with `asyd` using `sudo`, so instead I'd heavily recommend [following this guide](./CREATING_A_SERVICE_ACCOUNT.md) to making a service account for `asyd`.
 
 ## WARNING
 This is probably obvious, but be mindful about architectural differences if you are building code on, say, a Mac and using `asyd` to deploy the project on a linux server - that executable is NOT going to run properly unless you cross compile.
@@ -22,7 +20,7 @@ This is probably obvious, but be mindful about architectural differences if you 
 3. Add the `./out` directory to your path to use `asyd` anywhere
 
 ## Usage
-Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh -i yourkey.pem you@yourserver`
+Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh you@yourserver`
 
 ### General
 * List all your current projects and whether or not they're currently running: `asyd ls`
