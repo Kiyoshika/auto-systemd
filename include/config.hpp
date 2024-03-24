@@ -5,6 +5,7 @@
 #include <utility>
 #include <functional>
 #include <unordered_map>
+#include <filesystem>
 
 namespace asyd
 {
@@ -22,14 +23,15 @@ public:
     Config(enum asyd::ConfigType config_type)
     {
         this->config_type = config_type;
+        this->key_action["project_name"] = &Config::set_project_name;
         this->key_action["project_description"] = &Config::set_project_description;
         this->key_action["service_username"] = &Config::set_service_username;
         this->key_action["server_hostname"] = &Config::set_server_hostname;
-        this->key_action["public_key_path"] = &Config::set_public_key_path;
         this->key_action["working_directory"] = &Config::set_working_directory;
         this->key_action["entry_point"] = &Config::set_entry_point;
-        this->key_action["port"] = &Config::set_port;
         this->key_action["schedule"] = &Config::set_schedule;
+        this->key_action["server_home_directory"] = &Config::set_server_home_directory;
+        this->key_action["server_bash_directory"] = &Config::set_server_bash_directory;
     }
 
     ConfigType get_type() const;
@@ -42,44 +44,63 @@ public:
     // Returns true on succcess, false otherwise.
     bool to_file(const std::string& filepath) const;
 
+    // fetches the home directory and bash directory to
+    // setup systemd service properly (some distributions can vary)
+    bool fetch_server_info();
+
+    // Converts the current config to a systemd service file which is
+    // then transferred to the server
+    bool to_systemd_service(const std::string& config_directory) const;
+
+    // Copies the files from the local working directory to
+    // ~/.asyd/project_name on the remote server
+    // Copies the systemd service config to: /etc/systemd/system
+    // Starts the service
+    bool setup_server(const std::string& config_directory);
+
     void set_project_description(const std::string& project_description)
     {
-        this->project_description = project_description;
+        this->project_description = this->strip_newline(project_description);
     }
 
     void set_service_username(const std::string& service_username)
     {
-        this->service_username = service_username;
+        this->service_username = this->strip_newline(service_username);
     }
 
     void set_server_hostname(const std::string& server_hostname)
     {
-        this->server_hostname = server_hostname;
-    }
-
-    void set_public_key_path(const std::string& public_key_path)
-    {
-        this->public_key_path = public_key_path;
+        this->server_hostname = this->strip_newline(server_hostname);
     }
 
     void set_working_directory(const std::string& working_directory)
     {
-        this->working_directory = working_directory;
+        this->working_directory = this->strip_newline(working_directory);
     }
 
     void set_entry_point(const std::string& entry_point)
     {
-        this->entry_point = entry_point;
-    }
-
-    void set_port(const std::string& port)
-    {
-        this->port = port;
+        this->entry_point = this->strip_newline(entry_point);
     }
 
     void set_schedule(const std::string& schedule)
     {
-        this->schedule = schedule;
+        this->schedule = this->strip_newline(schedule);
+    }
+
+    void set_project_name(const std::string& project_name)
+    {
+        this->project_name = this->strip_newline(project_name);
+    }
+
+    void set_server_home_directory(const std::string& server_home_directory)
+    {
+        this->server_home_directory = this->strip_newline(server_home_directory);
+    }
+
+    void set_server_bash_directory(const std::string& server_bash_directory)
+    {
+        this->server_bash_directory = this->strip_newline(server_bash_directory);
     }
 
     const std::string& get_project_description() const
@@ -97,11 +118,6 @@ public:
         return this->server_hostname;
     }
 
-    const std::string& get_public_key_path() const
-    {
-        return this->public_key_path;
-    }
-
     const std::string& get_working_directory() const
     {
         return this->working_directory;
@@ -112,30 +128,53 @@ public:
         return this->entry_point;
     }
 
-    const std::string& get_port() const
-    {
-        return this->port;
-    }
-
     const std::string& get_schedule() const
     {
         return this->schedule;
     }
 
+    const std::string& get_project_name() const
+    {
+        return this->project_name;
+    }
+
+    const std::string& get_server_home_directory() const
+    {
+        return this->server_home_directory;
+    }
+
+    const std::string& get_server_bash_directory() const
+    {
+        return this->server_bash_directory;
+    }
+
 private:
+    std::string project_name;
     enum asyd::ConfigType config_type;
+
+    // server-specific settings that need to be fetched
+    std::string server_home_directory;
+    std::string server_bash_directory;
 
     std::string project_description;    // -d
     std::string service_username;       // -u
     std::string server_hostname;        // -h
-    std::string public_key_path;        // -k
     std::string working_directory;      // -D
     std::string entry_point;            // -e
-    std::string port;                   // -p
     std::string schedule;               // -s
 
     std::unordered_map<std::string, key_action_fptr> key_action;
 
     std::pair<std::string, std::string> parse_line(const std::string& current_line) const;
+
+    std::string strip_newline(const std::string& value)
+    {
+        std::string new_value = value;
+        if (!new_value.empty() && new_value[new_value.length()-1] == '\n')
+            new_value.erase(new_value.length()-1);
+
+        return new_value;
+    }
+
 }; // class Config
 }; // namespace asyd

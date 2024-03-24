@@ -36,39 +36,54 @@ void generate_config(Config& config, const std::string& path)
     std::getline(std::cin, entry);
     config.set_server_hostname(entry);
 
-    /* PUBLIC KEY PATH */
-    std::cout << "\nFull server public key path (e.g., /home/Users/dev/.ssh/your_key.pub): ";
-    std::getline(std::cin, entry);
-    config.set_public_key_path(entry);
-
     /* WORKING DIRECTORY */
     std::cout << "\nFull working directory to your project (e.g., /home/Users/dev/myproject): ";
     std::getline(std::cin, entry);
     config.set_working_directory(entry);
 
     /* ENTRY POINT */
-    std::cout << "\nEntry point relative to working directory (e.g., ./build/myexe or python3 -m build): ";
+    std::cout << "\nEntry point script relative to working directory (e.g., build/start.sh): ";
     std::getline(std::cin, entry);
     config.set_entry_point(entry);
 
-    /* PORT */
-    if (config.get_type() == ConfigType::SERVER)
-    {
-        std::cout << "\nPort your server runs on (e.g., 5000 or 8080): ";
-        std::getline(std::cin, entry);
-        config.set_port(entry);
-    }
-
     /* SCHEDULE */
-    else if (config.get_type() == ConfigType::JOB)
+    if (config.get_type() == ConfigType::JOB)
     {
         std::cout << "\nJob schedule in systemd's OnCalendar format (e.g., Mon,Fri *-*-* 06:00:00): ";
         std::getline(std::cin, entry);
         config.set_schedule(entry);
     }
 
+    if (!config.to_file(path + "/config.cfg"))
+    {
+        std::cerr << "THERE WAS A PROBLEM WRITING CONFIG FILE TO '" << path << "'.\n";
+        std::filesystem::remove_all(path);
+        return;
+    }
+
+    if (!config.fetch_server_info())
+    {
+        std::cerr << "THERE WAS A PROBLEM FETCHING SERVER INFO.\n";
+        std::filesystem::remove_all(path);
+        return;
+    }
+
+    if (!config.to_systemd_service(path))
+    {
+        std::cerr << "THERE WAS A PROBLEM WRITING SYSTEMD SERVICE TO '" << path << "'.\n";
+        std::filesystem::remove_all(path);
+        return;
+    }
+
+    if (!config.setup_server(path))
+    {
+        std::cerr << "THERE WAS A PROBLEM SETTING UP THE SERVER. CHECK YOUR CONNECTION SETTINGS.\n";
+        std::filesystem::remove_all(path);
+        return;
+    }
+
     config.to_file(path + "/config.cfg");
-    std::cout << "\nSUCCESSFULLY WRITTEN CONFIG TO '" << path << "'.\n";
+    std::cout << "\nSUCCESSFULLY CONFIGURED SERVER AND WROTE LOCAL CONFIG TO '" << path << "'.\n";
 }
 
 bool create_project_dir(const std::string& project_name, const std::string& project_type)
@@ -86,11 +101,13 @@ bool create_project_dir(const std::string& project_name, const std::string& proj
     if (project_type == "server")
     {
         Config config(ConfigType::SERVER);
+        config.set_project_name(project_name);
         generate_config(config, project_dir);
     }
     else if (project_type == "job")
     {
         Config config(ConfigType::JOB);
+        config.set_project_name(project_name);
         generate_config(config, project_dir);
     }
     else
