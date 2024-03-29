@@ -22,7 +22,7 @@ bool Config::from_file(const std::string& filepath)
     std::string current_line;
     while (std::getline(config, current_line))
     {
-        auto [key, value] = this->parse_line(current_line);
+        auto [key, value] = asyd::util::parse_line(current_line);
         if (key == "config_type")
         {
             if (value == "server")
@@ -69,59 +69,6 @@ bool Config::to_file(const std::string& filepath) const
     config << "server_bash_directory=" << this->server_bash_directory << "\n";
     config.close();
     return true;
-}
-
-bool Config::to_systemd_service(const std::string& config_directory) const
-{
-    std::string service_path = config_directory + "/" + this->project_name + ".service";
-
-    std::ofstream servicefile(service_path);
-    if (!servicefile.is_open())
-        return false;
-
-    servicefile << "[Unit]\n";
-    servicefile << "Description=" << this->project_description << "\n";
-
-    servicefile << "\n[Service]\n";
-    servicefile << "Type=simple\n";
-    servicefile << "Restart=always\n";
-    servicefile << "RestartSec=1\n";
-    std::string server_project_dir = this->server_home_directory + "/.asyd/" + this->project_name;
-    servicefile << "WorkingDirectory=" << server_project_dir << "\n";
-    servicefile << "ExecStart=" << this->server_bash_directory << " -c '" << server_project_dir << "/" << this->entry_point << "'\n";
-
-    servicefile << "\n[Install]\n";
-    // TODO: this is different for jobs I believe...
-    if (this->service_username == "sudo")
-        servicefile << "WantedBy=multi-user.target\n";
-    else
-        servicefile << "WantedBy=default.target\n";
-
-    servicefile.close();
-    return true;
-}
-
-std::pair<std::string, std::string> Config::parse_line(const std::string& current_line) const
-{
-    std::string key = "";
-    std::string value = "";
-    bool parsing_key = true;
-
-    for (const char c : current_line)
-    {
-        if (c == '=')
-        {
-            parsing_key = false;
-            continue;
-        }
-
-        if (parsing_key)
-            key += c;
-        else
-            value += c;
-    }
-
-    return std::make_pair(key, value);
 }
 
 // TODO: also return false if the exit status on command is non-zero

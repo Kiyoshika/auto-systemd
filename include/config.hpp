@@ -7,6 +7,9 @@
 #include <unordered_map>
 #include <filesystem>
 
+#include "util.hpp"
+#include "systemd.hpp"
+
 namespace asyd
 {
 enum ConfigType
@@ -48,10 +51,6 @@ public:
     // setup systemd service properly (some distributions can vary)
     bool fetch_server_info();
 
-    // Converts the current config to a systemd service file which is
-    // then transferred to the server
-    bool to_systemd_service(const std::string& config_directory) const;
-
     // Copies the files from the local working directory to
     // ~/.asyd/project_name on the remote server
     // Copies the systemd service config to: /etc/systemd/system
@@ -60,47 +59,47 @@ public:
 
     void set_project_description(const std::string& project_description)
     {
-        this->project_description = this->strip_newline(project_description);
+        this->project_description = asyd::util::strip_newline(project_description);
     }
 
     void set_service_username(const std::string& service_username)
     {
-        this->service_username = this->strip_newline(service_username);
+        this->service_username = asyd::util::strip_newline(service_username);
     }
 
     void set_server_hostname(const std::string& server_hostname)
     {
-        this->server_hostname = this->strip_newline(server_hostname);
+        this->server_hostname = asyd::util::strip_newline(server_hostname);
     }
 
     void set_working_directory(const std::string& working_directory)
     {
-        this->working_directory = this->strip_newline(working_directory);
+        this->working_directory = asyd::util::strip_newline(working_directory);
     }
 
     void set_entry_point(const std::string& entry_point)
     {
-        this->entry_point = this->strip_newline(entry_point);
+        this->entry_point = asyd::util::strip_newline(entry_point);
     }
 
     void set_schedule(const std::string& schedule)
     {
-        this->schedule = this->strip_newline(schedule);
+        this->schedule = asyd::util::strip_newline(schedule);
     }
 
     void set_project_name(const std::string& project_name)
     {
-        this->project_name = this->strip_newline(project_name);
+        this->project_name = asyd::util::strip_newline(project_name);
     }
 
     void set_server_home_directory(const std::string& server_home_directory)
     {
-        this->server_home_directory = this->strip_newline(server_home_directory);
+        this->server_home_directory = asyd::util::strip_newline(server_home_directory);
     }
 
     void set_server_bash_directory(const std::string& server_bash_directory)
     {
-        this->server_bash_directory = this->strip_newline(server_bash_directory);
+        this->server_bash_directory = asyd::util::strip_newline(server_bash_directory);
     }
 
     const std::string& get_project_description() const
@@ -164,17 +163,5 @@ private:
     std::string schedule;               // -s
 
     std::unordered_map<std::string, key_action_fptr> key_action;
-
-    std::pair<std::string, std::string> parse_line(const std::string& current_line) const;
-
-    std::string strip_newline(const std::string& value)
-    {
-        std::string new_value = value;
-        if (!new_value.empty() && new_value[new_value.length()-1] == '\n')
-            new_value.erase(new_value.length()-1);
-
-        return new_value;
-    }
-
 }; // class Config
 }; // namespace asyd
