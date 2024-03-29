@@ -1,5 +1,6 @@
 #include "config.hpp"
 #include "argparse.hpp"
+#include "systemd.hpp"
 #include <filesystem>
 #include <cstdlib>
 
@@ -37,8 +38,14 @@ void generate_config(Config& config, const std::string& path)
     config.set_server_hostname(entry);
 
     /* WORKING DIRECTORY */
-    std::cout << "\nFull working directory to your project (e.g., /home/Users/dev/myproject): ";
+    std::cout << "\nFull working directory to your project (e.g., /home/you/myproject): ";
     std::getline(std::cin, entry);
+    if (entry.length() > 0 && entry[0] != '/')
+    {
+        std::cerr << "FULL WORKING DIRECTORY MUST START WITH A FORWARD SLASH '/'.\n";
+        std::filesystem::remove_all(path);
+        return;
+    }
     config.set_working_directory(entry);
 
     /* ENTRY POINT */
@@ -68,7 +75,10 @@ void generate_config(Config& config, const std::string& path)
         return;
     }
 
-    if (!config.to_systemd_service(path))
+    Systemd service;
+    service.from_config(config);
+
+    if (!service.to_file(path + "/" + config.get_project_name() + ".service"))
     {
         std::cerr << "THERE WAS A PROBLEM WRITING SYSTEMD SERVICE TO '" << path << "'.\n";
         std::filesystem::remove_all(path);
