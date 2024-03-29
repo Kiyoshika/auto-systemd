@@ -29,6 +29,10 @@ Before reading on, this assumes you have a working server to connect to via SSH 
     * `asyd status your-project-name -o status.log` - writes the output into `status.log`
 * Start/stop/restart a service
     * `asyd [start|stop|restart] your-project-name`
+* Pull all services from the server to your local system (WARNING: this will overwrite any local service(s) with the same name)
+    * `asyd pull you@yourserver`
+* Pull a specific service from the server to your local system (WARNING: this will overwrite any local service with the same name)
+    * `asyd pull your-project-name you@yourserver`
 
 ### Creating a New Project
 There are two different types of services: servers and jobs. A server is a continuously running process while a job is a process that is executed on a schedule.
