@@ -1,6 +1,8 @@
 #include "config.hpp"
 #include "argparse.hpp"
 #include "systemd.hpp"
+#include "server.hpp"
+
 #include <filesystem>
 #include <cstdlib>
 
@@ -61,16 +63,19 @@ void generate_config(Config& config, const std::string& path)
         config.set_schedule(entry);
     }
 
-    if (!config.to_file(path + "/config.cfg"))
+    Server server(config.get_server_hostname());
+    if (!server.fetch_info())
     {
-        std::cerr << "THERE WAS A PROBLEM WRITING CONFIG FILE TO '" << path << "'.\n";
+        std::cerr << "THERE WAS A PROBLEM FETCHING SERVER INFO FROM '" << config.get_server_hostname() << "'.\n";
         std::filesystem::remove_all(path);
         return;
     }
+    config.set_server_home_directory(server.get_home());
+    config.set_server_bash_directory(server.get_bash());
 
-    if (!config.fetch_server_info())
+    if (!config.to_file(path + "/config.cfg"))
     {
-        std::cerr << "THERE WAS A PROBLEM FETCHING SERVER INFO.\n";
+        std::cerr << "THERE WAS A PROBLEM WRITING CONFIG FILE TO '" << path << "'.\n";
         std::filesystem::remove_all(path);
         return;
     }
