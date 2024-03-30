@@ -23,10 +23,10 @@ This is probably obvious, but be mindful about architectural differences if you 
 Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh you@yourserver`
 
 ### General
-* List all your current projects and whether or not they're currently running: `asyd ls`
+* List all your current projects and whether or not they're currently running:
+    * `asyd ls`
 * Fetch the status of a service:
-    * `asyd status your-project-name` - writes the output to STDOUT
-    * `asyd status your-project-name -o status.log` - writes the output into `status.log`
+    * `asyd status your-project-name`
 * Start/stop/restart a service
     * `asyd [start|stop|restart] your-project-name`
 * Pull all services from the server to your local system (WARNING: this will overwrite any local service(s) with the same name)
@@ -43,10 +43,10 @@ There are two different types of services: servers and jobs. A server is a conti
 
 When creating a new project, the CLI will walk you through the initial setup to create the starting config, but these options can be changed at anytime as seen below.
 
-Note that you can specify more than one option at a time, but they're listed individually for clarity.
-
 #### Common Config Options
 These are config options that apply to both servers and jobs.
+
+Note that you can specify more than one option at a time, but they're listed individually for clarity.
 * `-d`: Set the description of the systemd service
     * `asyd -P your-project-name -d "My description of the service"`
 * `-u`: Set the username that will be running the service on the remote server. The server admin needs to set this up beforehand
@@ -62,11 +62,6 @@ These are config options that apply to both servers and jobs.
     * `asyd -P your-project-name -e ./build/myexe` - an example for running a compiled executable
 * `-r`: Rename the project
     * `asyd -P your-project-name -r new-project-name`
-
-#### Server Config Options
-These are config options that apply only to servers and have no effect if they're applied on a job.
-* `-p`: Set the port your server executable runs on
-    * `asyd -P your-project-name -p 5000`
 
 #### Job Config Options
 These are config options that apply only to jobs and have no effect if they're applied on a server.
