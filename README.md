@@ -53,13 +53,10 @@ Note that you can specify more than one option at a time, but they're listed ind
     * `asyd -P your-project-name -u dedicated-user`
 * `-h`: Set the hostname of the server you are deploying to
     * `asyd -P your-project-name -h you@yourserver`
-* `-k`: Set the path to the local public key to authenticate into your remote server
-    * `asyd -P your-project-name -k /path/to/yourkey.pub`
 * `-D`: Set the path to a directory to copy over to the remote server to make the working directory for the service
     * `asyd -P your-project-name -D /full/local/path/to/my-project`
-* `-e`: Set the entry point for the service - i.e., the command that runs the server or job. The path is relative to what's set by `-D`.
-    * `asyd -P your-project-name -e "python3 -m my-server"` - an example for running a python module
-    * `asyd -P your-project-name -e ./build/myexe` - an example for running a compiled executable
+* `-e`: Set the entry point for the service - i.e., the shell script that runs the server or job. The path is relative to what's set by `-D`.
+    * `asyd -P your-project-name -e build/run.exe` - an example for running a compiled executable
 * `-r`: Rename the project
     * `asyd -P your-project-name -r new-project-name`
 

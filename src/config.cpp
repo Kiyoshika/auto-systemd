@@ -10,11 +10,6 @@
 
 using namespace asyd;
 
-ConfigType Config::get_type() const
-{
-    return this->config_type;
-}
-
 bool Config::from_file(const std::string& filepath)
 {
     std::ifstream config(filepath);
@@ -25,23 +20,13 @@ bool Config::from_file(const std::string& filepath)
     while (std::getline(config, current_line))
     {
         auto [key, value] = asyd::util::parse_line(current_line);
-        if (key == "config_type")
+        key_action_fptr key_action = this->key_action[key];
+        if (!key_action)
         {
-            if (value == "server")
-                this->config_type = ConfigType::SERVER;
-            else
-                this->config_type = ConfigType::JOB;
+            config.close();
+            return false;
         }
-        else
-        {
-            key_action_fptr key_action = this->key_action[key];
-            if (!key_action)
-            {
-                config.close();
-                return false;
-            }
-            (this->*key_action)(value);
-        }
+        (this->*key_action)(value);
     }
 
     config.close();
@@ -54,19 +39,13 @@ bool Config::to_file(const std::string& filepath) const
     if (!config.is_open())
         return false;
 
-    if (this->config_type == ConfigType::SERVER)
-        config << "config_type=server\n";
-    else
-        config << "config_type=job\n";
-
     config << "project_name=" << this->project_name << "\n";
     config << "project_description=" << this->project_description << "\n";
     config << "service_username=" << this->service_username << "\n";
     config << "server_hostname=" << this->server_hostname << "\n";
     config << "working_directory=" << this->working_directory << "\n";
     config << "entry_point=" << this->entry_point << "\n";
-    if (this->get_type() == ConfigType::JOB)
-        config << "schedule=" << this->schedule << "\n";
+    config << "schedule=" << this->schedule << "\n";
     config << "server_home_directory=" << this->server_home_directory << "\n";
     config << "server_bash_directory=" << this->server_bash_directory << "\n";
     config.close();
