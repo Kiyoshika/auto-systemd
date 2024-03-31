@@ -78,6 +78,24 @@ bool Server::create_directory(const std::string& path)
     return true;
 }
 
+bool Server::remove_directory(const std::string& path)
+{
+    // NOTE: the path is sanitized beforehand
+    Command command;
+
+    command.add("ssh")
+        .add(this->hostname)
+        .addQuote()
+        .add("rm -rf")
+        .add(path, false)
+        .addQuote();
+
+    if (!command.execute())
+        return false;
+
+    return true;
+}
+
 bool Server::copy_from_local(
     const std::string& from_local_path,
     const std::string& to_server_path)
@@ -189,6 +207,31 @@ bool Server::stop_service(const std::string& service_name)
 bool Server::restart_service(const std::string& service_name)
 {
     return this->systemd_action("restart", service_name);
+}
+
+bool Server::remove_service(const std::string& service_name)
+{
+    if (!this->stop_service(service_name))
+        return false;
+
+    Command command;
+
+    command.add("ssh")
+        .add(this->hostname)
+        .addQuote();
+
+    if (this->is_root)
+        command.add("rm /etc/systemd/system/", false);
+    else
+        command.add("rm ~/.config/systemd/user/", false);
+
+    command.add(service_name, false)
+        .addQuote();
+
+    if (!command.execute())
+        return false;
+
+    return true;
 }
 
 const std::string& Server::get_home() const

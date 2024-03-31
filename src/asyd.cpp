@@ -18,7 +18,7 @@ std::string get_home_dir()
     #endif
 }
 
-void generate_config(Config& config, const std::string& path)
+void generate_config(Config& config, const std::string& project_type, const std::string& path)
 {
     std::string entry = "";
 
@@ -56,7 +56,7 @@ void generate_config(Config& config, const std::string& path)
     config.set_entry_point(entry);
 
     /* SCHEDULE */
-    if (config.get_type() == ConfigType::JOB)
+    if (project_type == "job")
     {
         std::cout << "\nJob schedule in systemd's OnCalendar format (e.g., Mon,Fri *-*-* 06:00:00): ";
         std::getline(std::cin, entry);
@@ -115,19 +115,41 @@ bool create_project_dir(const std::string& project_name, const std::string& proj
 
     if (project_type == "server")
     {
-        Config config(ConfigType::SERVER);
+        Config config;
         config.set_project_name(project_name);
-        generate_config(config, project_dir);
+        generate_config(config, project_type, project_dir);
     }
     else if (project_type == "job")
     {
-        Config config(ConfigType::JOB);
+        Config config;
         config.set_project_name(project_name);
-        generate_config(config, project_dir);
+        generate_config(config, project_type, project_dir);
     }
     else
         return false;
 
+    return true;
+}
+
+bool remove_project(const std::string& project_name)
+{
+    std::string project_home_dir = get_home_dir() + "/.asyd/" + project_name;
+    if (!std::filesystem::exists(project_home_dir))
+        return false;
+
+    Config config;
+    config.from_file(project_home_dir + "/config.cfg");
+
+    Server server(config.get_server_hostname());
+    if (!server.remove_directory("~/.asyd/" + project_name))
+        return false;
+
+    if (!server.remove_service(project_name + ".service"))
+        return false;
+
+    std::filesystem::remove_all(project_home_dir);
+
+    std::cout << "SUCCESSFULLY REMOVED PROJECT '" << project_name << "' FROM SERVER AND LOCAL CONFIG.\n";
     return true;
 }
 
@@ -155,7 +177,18 @@ int main(int argc, char** argv)
     }
     else if (argc == 3 && std::string(argv[1]) == "remove")
     {
+        std::string project_name = std::string(argv[2]);
+        if (project_name.find("..") != std::string::npos || project_name.find("/") != std::string::npos)
+        {
+            std::cerr << "What are you trying to do with that project name...?\n";
+            return -1;
+        }
 
+        if (!remove_project(project_name))
+        {
+            std::cerr << "Failed to remove project '" << project_name << "'.\n";
+            return -1;
+        }
     }
     else
     {
@@ -175,9 +208,6 @@ int main(int argc, char** argv)
             std::cout << program.get<std::string>("action") << "\n";
         }
     }
-
-    Config config(ConfigType::SERVER);
-    config.to_file("test.cfg");
 
     return 0;
 }

@@ -20,6 +20,7 @@ public:
     bool fetch_info();
 
     bool create_directory(const std::string& path);
+    bool remove_directory(const std::string& path);
 
     bool chmod(
         const std::string& chmod_options,
@@ -38,6 +39,7 @@ public:
     bool start_service(const std::string& service_name);
     bool stop_service(const std::string& service_name);
     bool restart_service(const std::string& service_name);
+    bool remove_service(const std::string& service_name);
 
     const std::string& get_home() const;
     const std::string& get_bash() const;

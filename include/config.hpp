@@ -12,20 +12,13 @@
 
 namespace asyd
 {
-enum ConfigType
-{
-    SERVER,
-    JOB
-}; // enum ConfigType
-
 class Config 
 {
 public:
     typedef void (Config::*key_action_fptr)(const std::string&);
 
-    Config(enum asyd::ConfigType config_type)
+    Config()
     {
-        this->config_type = config_type;
         this->key_action["project_name"] = &Config::set_project_name;
         this->key_action["project_description"] = &Config::set_project_description;
         this->key_action["service_username"] = &Config::set_service_username;
@@ -36,8 +29,6 @@ public:
         this->key_action["server_home_directory"] = &Config::set_server_home_directory;
         this->key_action["server_bash_directory"] = &Config::set_server_bash_directory;
     }
-
-    ConfigType get_type() const;
 
     // Reads config settings from file.
     // Returns true on success, false otherwise.
@@ -149,7 +140,6 @@ public:
 
 private:
     std::string project_name;
-    enum asyd::ConfigType config_type;
 
     // server-specific settings that need to be fetched
     std::string server_home_directory;
