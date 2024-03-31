@@ -15,6 +15,16 @@ std::string CLI::get_home_dir() const
     #endif
 }
 
+std::string CLI::get_asyd_dir() const
+{
+    return this->get_home_dir() + "/.asyd/";
+}
+
+std::string CLI::get_asyd_project_dir(const std::string& project_name) const
+{
+    return this->get_asyd_dir() + project_name + "/";
+}
+
 void CLI::generate_config(
     Config& config,
     const std::string& project_type,
@@ -109,7 +119,7 @@ bool CLI::create_project_dir(
     if (!std::filesystem::exists(asyd_dir))
         std::filesystem::create_directory(asyd_dir);
 
-    std::string project_dir = asyd_dir + project_name;
+    std::string project_dir = this->get_asyd_project_dir(project_name);
     if (std::filesystem::exists(project_dir))
         return false;
 
@@ -135,12 +145,12 @@ bool CLI::create_project_dir(
 
 bool CLI::remove_project(const std::string& project_name) const
 {
-    std::string project_home_dir = get_home_dir() + "/.asyd/" + project_name;
+    std::string project_home_dir = this->get_asyd_project_dir(project_name);
     if (!std::filesystem::exists(project_home_dir))
         return false;
 
     Config config;
-    config.from_file(project_home_dir + "/config.cfg");
+    config.from_file(project_home_dir + "config.cfg");
 
     Server server(config.get_server_hostname());
     if (!server.remove_directory("~/.asyd/" + project_name))
@@ -153,4 +163,45 @@ bool CLI::remove_project(const std::string& project_name) const
 
     std::cout << "SUCCESSFULLY REMOVED PROJECT '" << project_name << "' FROM SERVER AND LOCAL CONFIG.\n";
     return true;
+}
+
+bool CLI::service_action(const std::string& project_name, const std::string& action) const
+{
+    std::string project_dir = this->get_asyd_project_dir(project_name);
+    if (!std::filesystem::exists(project_dir))
+        return false;
+
+    Config config;
+    config.from_file(project_dir + "config.cfg");
+
+    std::string service_name = project_name + ".service";
+
+    Server server(config.get_server_hostname());
+    if (action == "start" && !server.start_service(service_name))
+        return false;
+    else if (action == "stop" && !server.stop_service(service_name))
+        return false;
+    else if (action == "restart" && !server.restart_service(service_name))
+        return false;
+
+    std::string action_copy = action + "ed";
+    std::transform(action_copy.begin(), action_copy.end(), action_copy.begin(), ::toupper);
+    std::cout << "SUCCESSFULLY " << action_copy << " SERVICE '" << project_name << "'.\n";
+
+    return true;
+}
+
+bool CLI::start_service(const std::string& project_name) const
+{
+    return this->service_action(project_name, "start");
+}
+
+bool CLI::stop_service(const std::string& project_name) const
+{
+    return this->service_action(project_name, "stop");
+}
+
+bool CLI::restart_service(const std::string& project_name) const
+{
+    return this->service_action(project_name, "restart");
 }
