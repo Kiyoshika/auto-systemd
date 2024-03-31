@@ -1,5 +1,5 @@
-# Auto Systemd (asyd)
-This project is to simplify the process of "deploying" code to a **linux** server that you own.
+# Auto Systemd (asyd) - Pronounced 'acid'
+This project is to simplify the process of "deploying" code to a **linux** server that you have access to.
 
 Typically systemd services/timers are used to either run servers or schedule jobs, but setting them up and deploying changes can be a bit tedious. That's where this tool comes to bridge the gap.
 
@@ -18,6 +18,18 @@ This is probably obvious, but be mindful about architectural differences if you 
 1. `git clone --recursive git@github.com:Kiyoshika/auto-systemd.git`
 2. `make` to build the `asyd` executable into the `./out` directory
 3. Add the `./out` directory to your path to use `asyd` anywhere
+
+## 1.0 Roadmap
+This is the general roadmap to target a "1.0" usable release - all the basic core features to have a functioning command line tool (not necessarily in order):
+* ~Create a server~
+* Create a job
+* ~Remove a project~
+* Implement all config command line options
+* Add help option to command line
+* Check status of service
+* Start/Stop/Restart a service
+* List all asyd services
+* Pull all asyd services from server
 
 ## Usage
 Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh you@yourserver`
