@@ -30,6 +30,7 @@ This is the general roadmap to target a "1.0" usable release - all the basic cor
 * ~Start/Stop/Restart a service~
 * List all asyd services
 * Pull all asyd services from server
+* Include a full walkthrough example on deploying a Flask server
 
 ## Usage
 Before reading on, this assumes you have a working server to connect to via SSH with your own public/private keys setup. E.g., `ssh you@yourserver`
