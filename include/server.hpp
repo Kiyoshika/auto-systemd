@@ -19,27 +19,30 @@ public:
     // create the systemd service file
     bool fetch_info();
 
-    bool create_directory(const std::string& path);
-    bool remove_directory(const std::string& path);
+    bool create_directory(const std::string& path) const;
+    bool remove_directory(const std::string& path) const;
 
     bool chmod(
         const std::string& chmod_options,
-        const std::string& target_file);
+        const std::string& target_file) const;
 
     bool copy_from_local(
         const std::string& from_local_path,
-        const std::string& to_server_path);
+        const std::string& to_server_path) const;
 
     bool copy_systemd_file(
         const std::string& local_directory,
-        const std::string& service_name);
+        const std::string& service_name) const;
 
-    bool reload_service();
-    bool enable_service(const std::string& service_name);
-    bool start_service(const std::string& service_name);
-    bool stop_service(const std::string& service_name);
-    bool restart_service(const std::string& service_name);
-    bool remove_service(const std::string& service_name);
+    bool reload_service() const;
+    bool enable_service(const std::string& service_name) const;
+    bool start_service(const std::string& service_name) const;
+    bool stop_service(const std::string& service_name) const;
+    bool restart_service(const std::string& service_name) const;
+    bool remove_service(const std::string& service_name) const;
+
+    // check the status of a service and write it into [output]
+    bool check_status(const std::string& service_name, std::string& output) const;
 
     const std::string& get_home() const;
     const std::string& get_bash() const;
@@ -51,6 +54,6 @@ private:
 
     bool is_root;
 
-    bool systemd_action(const std::string& action, const std::string& service_name);
+    bool systemd_action(const std::string& action, const std::string& service_name) const;
 }; // class Server
 }; // namespace asyd

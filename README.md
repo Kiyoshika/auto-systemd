@@ -26,7 +26,7 @@ This is the general roadmap to target a "1.0" usable release - all the basic cor
 * ~Remove a project~
 * Implement all config command line options
 * Add help option to command line
-* Check status of service
+* ~Check status of service~
 * ~Start/Stop/Restart a service~
 * List all asyd services
 * Pull all asyd services from server
