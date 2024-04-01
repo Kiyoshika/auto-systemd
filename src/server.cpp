@@ -268,3 +268,95 @@ bool Server::check_status(const std::string& service_name, std::string& output) 
     output = command.get_output();
     return true;
 }
+
+bool Server::list_services(std::string& output) const
+{
+    Command command;
+
+    command.add("ssh")
+        .add(this->hostname)
+        .addQuote()
+        .add("systemctl --user --type=service --all", false)
+        .addQuote();
+
+    if (!command.execute())
+        return false;
+
+    output = command.get_output();
+    output = this->filter_service_list_output(output);
+    return true;
+}
+
+std::vector<std::string> Server::split_newlines(const std::string& command_output) const
+{
+    std::vector<std::string> tokens;
+    std::string current_token = "";
+
+    for (const char c : command_output)
+    {
+        if (c == '\n')
+        {
+            if (current_token.length() > 0)
+            {
+                tokens.push_back(current_token);
+                current_token = "";
+            }
+
+            continue;
+        }
+
+        current_token += c;
+    }
+
+    if (current_token.length() > 0)
+        tokens.push_back(current_token);
+
+    return tokens;
+}
+
+bool Server::service_is_loaded(const std::string& service_string) const
+{
+    size_t idx = 0;
+
+    // services with a "dot" at the begining are services that once existed
+    // but have been removed
+    if (service_string[0] == '\xe2')
+        return false;
+
+    // consume any leading space before service name
+    while (service_string[idx] == ' ' || service_string[idx] == '\t')
+        idx++;
+
+    // find position of first space/tab
+    std::string service_name = "";
+    while (service_string[idx] != ' ' && service_string[idx] != '\t')
+        service_name += service_string[idx++];
+
+    // only care about "asyd-" services
+    if (!(service_name.length() >= 5 && strncmp(service_name.c_str(), "asyd-", 5) == 0))
+        return false;
+
+    // consume spaces/tabs
+    while (service_string[idx] == ' ' || service_string[idx] == '\t')
+        idx++;
+
+    // extract text until first space
+    std::string text = "";
+    while (service_string[idx] != ' ' && service_string[idx] != '\t')
+        text += service_string[idx++];
+
+    return text == "loaded";
+}
+
+std::string Server::filter_service_list_output(const std::string& command_output) const
+{
+    std::vector<std::string> services = this->split_newlines(command_output);
+
+    std::string output = services[0];
+
+    for (size_t i = 1; i < services.size() - 1; ++i)
+        if (this->service_is_loaded(services[i]))
+            output += "\n" + services[i];
+
+    return output + "\n";
+}
