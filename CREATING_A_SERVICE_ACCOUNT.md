@@ -13,5 +13,7 @@ The below steps will need to be performed on your remote server as a sudo user.
 4. Give necessary permissions to the service account's home directory
     * `chown -R serviceuser:serviceuser /home/serviceuser`
     * `chmod -R u+rwx /home/serviceuser`
+5. Allow services to run for user when logged out - this is CRUCIAL otherwise when you disconnect from SSH, your services will stop running.
+    * `loginctl enable-linger serviceuser`
 
 After following these steps, you should be able to use `asyd` with your new service account!
