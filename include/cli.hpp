@@ -35,6 +35,9 @@ public:
     bool stop_service(const std::string& project_name) const;
     bool restart_service(const std::string& project_name) const;
 
+    // get the status of a service and write it into [output]
+    bool check_status(const std::string& project_name, std::string& output) const;
+
 private:
     std::string get_home_dir() const;
     std::string get_asyd_dir() const;

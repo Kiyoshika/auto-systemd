@@ -205,3 +205,21 @@ bool CLI::restart_service(const std::string& project_name) const
 {
     return this->service_action(project_name, "restart");
 }
+
+bool CLI::check_status(const std::string& project_name, std::string& output) const
+{
+    std::string project_dir = this->get_asyd_project_dir(project_name);
+    if (!std::filesystem::exists(project_dir))
+        return false;
+
+    Config config;
+    config.from_file(project_dir + "config.cfg");
+
+    std::string service_name = project_name + ".service";
+
+    Server server(config.get_server_hostname());
+    if (!server.check_status(service_name, output))
+        return false;
+
+    return true;
+}

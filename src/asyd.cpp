@@ -79,6 +79,17 @@ int main(int argc, char** argv)
                 return -1;
             }
         }
+        else if (action == "status")
+        {
+            std::string status;
+            if (!cli.check_status(project_name, status))
+            {
+                std::cerr << "Couldn't check status for service '" << project_name << "'.\n";
+                return -1;
+            }
+
+            std::cout << status << "\n";
+        }
         else
         {
             std::cerr << "Unknown command.\n";

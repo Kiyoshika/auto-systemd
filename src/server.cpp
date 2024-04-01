@@ -20,7 +20,7 @@ bool Server::fetch_info()
     
     // get home directory
     command.add("ssh")
-        .add(hostname)
+        .add(this->hostname)
         .addQuote()
         .add("pwd ~", false)
         .addQuote();
@@ -32,7 +32,7 @@ bool Server::fetch_info()
 
     // get bash directory
     command.add("ssh")
-        .add(hostname)
+        .add(this->hostname)
         .addQuote()
         .add("whereis bash", false)
         .addQuote();
@@ -61,12 +61,12 @@ void Server::set_hostname(const std::string& hostname)
     this->hostname = hostname;
 }
 
-bool Server::create_directory(const std::string& path)
+bool Server::create_directory(const std::string& path) const
 {
     Command command;
 
     command.add("ssh")
-        .add(hostname)
+        .add(this->hostname)
         .addQuote()
         .add("mkdir -p")
         .add(path, false)
@@ -78,7 +78,7 @@ bool Server::create_directory(const std::string& path)
     return true;
 }
 
-bool Server::remove_directory(const std::string& path)
+bool Server::remove_directory(const std::string& path) const
 {
     // NOTE: the path is sanitized beforehand
     Command command;
@@ -98,7 +98,7 @@ bool Server::remove_directory(const std::string& path)
 
 bool Server::copy_from_local(
     const std::string& from_local_path,
-    const std::string& to_server_path)
+    const std::string& to_server_path) const
 {
     Command command;
 
@@ -117,7 +117,7 @@ bool Server::copy_from_local(
 
 bool Server::chmod(
     const std::string& chmod_options,
-    const std::string& target_file)
+    const std::string& target_file) const
 {
     Command command;
 
@@ -137,7 +137,7 @@ bool Server::chmod(
 
 bool Server::copy_systemd_file(
     const std::string& local_directory,
-    const std::string& service_name)
+    const std::string& service_name) const
 {
     Command command;
 
@@ -149,9 +149,11 @@ bool Server::copy_systemd_file(
         .add(":", false);
 
     if (this->is_root)
-        command.add("/etc/systemd/system/", false).add(service_name, false);
+        command.add("/etc/systemd/system/", false);
     else
-        command.add("~/.config/systemd/user/", false).add(service_name, false);
+        command.add("~/.config/systemd/user/", false);
+
+    command.add(service_name, false);
 
     if (!command.execute())
         return false;
@@ -159,7 +161,7 @@ bool Server::copy_systemd_file(
     return true;
 }
 
-bool Server::systemd_action(const std::string& action, const std::string& service_name)
+bool Server::systemd_action(const std::string& action, const std::string& service_name) const
 {
     Command command;
 
@@ -184,32 +186,32 @@ bool Server::systemd_action(const std::string& action, const std::string& servic
     return true;
 }
 
-bool Server::reload_service()
+bool Server::reload_service() const
 {
     return this->systemd_action("daemon-reload", "");
 }
 
-bool Server::enable_service(const std::string& service_name)
+bool Server::enable_service(const std::string& service_name) const
 {
     return this->systemd_action("enable", service_name);
 }
 
-bool Server::start_service(const std::string& service_name)
+bool Server::start_service(const std::string& service_name) const
 {
     return this->systemd_action("start", service_name);
 }
 
-bool Server::stop_service(const std::string& service_name)
+bool Server::stop_service(const std::string& service_name) const
 {
     return this->systemd_action("stop", service_name);
 }
 
-bool Server::restart_service(const std::string& service_name)
+bool Server::restart_service(const std::string& service_name) const
 {
     return this->systemd_action("restart", service_name);
 }
 
-bool Server::remove_service(const std::string& service_name)
+bool Server::remove_service(const std::string& service_name) const
 {
     if (!this->stop_service(service_name))
         return false;
@@ -242,4 +244,27 @@ const std::string& Server::get_home() const
 const std::string& Server::get_bash() const
 {
     return this->bash_directory;
+}
+
+bool Server::check_status(const std::string& service_name, std::string& output) const
+{
+    Command command;
+
+    command.add("ssh")
+        .add(this->hostname)
+        .addQuote()
+        .add("systemctl");
+
+    if (!this->is_root)
+        command.add("--user");
+
+    command.add("status")
+        .add(service_name, false)
+        .addQuote();
+
+    if (!command.execute())
+        return false;
+
+    output = command.get_output();
+    return true;
 }
