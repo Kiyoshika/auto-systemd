@@ -1,5 +1,6 @@
 #include "cli.hpp"
 #include "argparse.hpp"
+#include "server.hpp"
 
 using namespace asyd;
 
@@ -89,6 +90,20 @@ int main(int argc, char** argv)
             }
 
             std::cout << status << "\n";
+        }
+        else if (action == "ls")
+        {
+            std::string hostname = std::string(argv[2]);
+            Server server(hostname);
+
+            std::string output;
+            if (!server.list_services(output))
+            {
+                std::cerr << "Couldn't list services.\n";
+                return -1;
+            }
+
+            std::cout << output << "\n";
         }
         else
         {

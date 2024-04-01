@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 
 namespace asyd
 {
@@ -40,6 +41,7 @@ public:
     bool stop_service(const std::string& service_name) const;
     bool restart_service(const std::string& service_name) const;
     bool remove_service(const std::string& service_name) const;
+    bool list_services(std::string& output) const;
 
     // check the status of a service and write it into [output]
     bool check_status(const std::string& service_name, std::string& output) const;
@@ -55,5 +57,10 @@ private:
     bool is_root;
 
     bool systemd_action(const std::string& action, const std::string& service_name) const;
+    // filters the output from list_services() to only include the services by asyd
+    // and that are still on the system
+    std::string filter_service_list_output(const std::string& command_output) const;
+    std::vector<std::string> split_newlines(const std::string& str) const;
+    bool service_is_loaded(const std::string& service_string) const;
 }; // class Server
 }; // namespace asyd

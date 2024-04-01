@@ -28,7 +28,7 @@ This is the general roadmap to target a "1.0" usable release - all the basic cor
 * Add help option to command line
 * ~Check status of service~
 * ~Start/Stop/Restart a service~
-* List all asyd services
+* ~List all asyd services~
 * Pull all asyd services from server
 * Include a full walkthrough example on deploying a Flask server
 
@@ -37,7 +37,7 @@ Before reading on, this assumes you have a working server to connect to via SSH 
 
 ### General
 * List all your current projects and whether or not they're currently running:
-    * `asyd ls`
+    * `asyd ls you@yourserver`
 * Fetch the status of a service:
     * `asyd status your-project-name`
 * Start/stop/restart a service
