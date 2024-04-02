@@ -153,7 +153,7 @@ bool Server::copy_systemd_file(
     else
         command.add("~/.config/systemd/user/", false);
 
-    command.add(service_name, false);
+    command.add("asyd-" + service_name, false);
 
     if (!command.execute())
         return false;
@@ -176,7 +176,7 @@ bool Server::systemd_action(const std::string& action, const std::string& servic
     command.add(action, service_name.length() > 0);
 
     if (service_name.length() > 0)
-        command.add(service_name, false);
+        command.add("asyd-" + service_name, false);
 
     command.addQuote();
 
@@ -227,7 +227,7 @@ bool Server::remove_service(const std::string& service_name) const
     else
         command.add("rm ~/.config/systemd/user/", false);
 
-    command.add(service_name, false)
+    command.add("asyd-" + service_name, false)
         .addQuote();
 
     if (!command.execute())
@@ -259,7 +259,7 @@ bool Server::check_status(const std::string& service_name, std::string& output) 
         command.add("--user");
 
     command.add("status")
-        .add(service_name, false)
+        .add("asyd-" + service_name, false)
         .addQuote();
 
     if (!command.execute())
@@ -356,7 +356,7 @@ std::string Server::filter_service_list_output(const std::string& command_output
 
     for (size_t i = 1; i < services.size() - 1; ++i)
         if (this->service_is_loaded(services[i]))
-            output += "\n" + services[i];
+            output += ("\n   *   " + services[i].substr(7)); // strips the asyd- prefix
 
     return output + "\n";
 }
