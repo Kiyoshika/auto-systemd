@@ -24,6 +24,7 @@ This is the general roadmap to target a "1.0" usable release - all the basic cor
 * ~Create a server~
 * Create a job
 * ~Remove a project~
+* Make deployments
 * Implement all config command line options
 * Add help option to command line
 * ~Check status of service~
