@@ -46,6 +46,8 @@ Before reading on, this assumes you have a working server to connect to via SSH 
     * `asyd pull you@yourserver`
 * Pull a specific service from the server to your local system (WARNING: this will overwrite any local service with the same name)
     * `asyd pull your-project-name you@yourserver`
+* Deploy changes to your project (automatically restarts the systemd service after deploying)
+    * `asyd deploy your-project-name`
 
 ### Creating a New Project
 There are two different types of services: servers and jobs. A server is a continuously running process while a job is a process that is executed on a schedule.
