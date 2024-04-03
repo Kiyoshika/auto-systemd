@@ -102,9 +102,10 @@ bool Server::copy_from_local(
 {
     Command command;
 
-    command.add("scp")
-        .add("-rp")
-        .add(from_local_path)
+    command.add("rsync")
+        .add("-a")
+        .add(from_local_path, false)
+        .add("/")
         .add(this->hostname, false)
         .add(":", false)
         .add(to_server_path);
@@ -141,7 +142,7 @@ bool Server::copy_systemd_file(
 {
     Command command;
 
-    command.add("scp")
+    command.add("rsync")
         .add(local_directory, false)
         .add("/", false)
         .add(service_name)
